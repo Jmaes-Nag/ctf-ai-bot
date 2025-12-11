@@ -1,0 +1,9 @@
+# .dockerignore
+
+# IGNORE THESE SECRETS
+.env
+.git
+__pycache__
+
+# ALLOW THESE
+# (Everything else is allowed by default, but we explicitly want to keep .env.example)

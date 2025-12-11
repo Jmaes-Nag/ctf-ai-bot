@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot CTF</title>
+    <style>
+        body { 
+            font-family: 'Courier New', monospace; 
+            background-color: #0d0d0d; 
+            color: #00ff00; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 50px;
+        }
+        .container { width: 600px; }
+        
+        /* Chat Interface Styles */
+        #chat-box { 
+            border: 1px solid #333; 
+            height: 300px; 
+            overflow-y: scroll; 
+            padding: 10px; 
+            background-color: #000; 
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px #003300;
+        }
+        .input-group { display: flex; gap: 10px; margin-bottom: 30px; }
+        input[type="text"] { 
+            flex-grow: 1; 
+            padding: 10px; 
+            background: #222; 
+            color: #0f0; 
+            border: 1px solid #333; 
+            font-family: inherit;
+        }
+        button { 
+            padding: 10px 20px; 
+            background: #005500; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            font-family: inherit; 
+            font-weight: bold;
+        }
+        button:hover { background: #007700; }
+
+        /* Flag Submission Styles */
+        .flag-section {
+            border-top: 1px solid #333;
+            padding-top: 20px;
+            text-align: center;
+        }
+        #flag-status {
+            margin-top: 10px;
+            font-weight: bold;
+            height: 20px;
+        }
+        .success { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
+        .failure { color: #ff0000; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>System Override Console</h1>
+        
+        <div id="chat-box">
+            <div><strong>System:</strong> Initializing interface...</div>
+            <div><strong>System:</strong> Connected to AI Guard.</div>
+        </div>
+        <div class="input-group">
+            <input type="text" id="chat-input" placeholder="Interact with the AI..." onkeypress="handleEnter(event, 'chat')">
+            <button onclick="sendChat()">Send</button>
+        </div>
+
+        <div class="flag-section">
+            <h3>Verify Capture Flag</h3>
+            <div class="input-group">
+                <input type="text" id="flag-input" placeholder="CTF{...}" onkeypress="handleEnter(event, 'flag')">
+                <button onclick="verifyFlag()">Submit Flag</button>
+            </div>
+            <div id="flag-status"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Chat Logic ---
+        async function sendChat() {
+            const inputField = document.getElementById('chat-input');
+            const message = inputField.value;
+            const chatBox = document.getElementById('chat-box');
+            
+            if (!message) return;
+
+            chatBox.innerHTML += `<div><strong>You:</strong> ${message}</div>`;
+            inputField.value = '';
+
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            });
+            
+            const data = await response.json();
+            chatBox.innerHTML += `<div><strong>AI:</strong> ${data.response}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // --- Flag Verification Logic ---
+        async function verifyFlag() {
+            const flagInput = document.getElementById('flag-input');
+            const statusDiv = document.getElementById('flag-status');
+            const guess = flagInput.value;
+
+            if (!guess) return;
+
+            const response = await fetch('/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ flag_guess: guess })
+            });
+
+            const data = await response.json();
+
+            statusDiv.innerText = data.message;
+            if (data.success) {
+                statusDiv.className = 'success';
+                // Satisfying glow effect on success
+                document.body.style.boxShadow = "inset 0 0 50px #00ff00";
+            } else {
+                statusDiv.className = 'failure';
+                document.body.style.boxShadow = "none";
+            }
+        }
+
+        function handleEnter(e, type) {
+            if (e.key === 'Enter') {
+                if (type === 'chat') sendChat();
+                if (type === 'flag') verifyFlag();
+            }
+        }
+    </script>
+</body>
+</html>
