@@ -50,7 +50,7 @@ docker run -p 5000:5000 --env-file .env jmaesng/ctf-ai-bot:latest
 If you want to modify the code or the HTML interface:
 1. Clone the repository:
 ```bash
-git clone <repo-url>
+git clone https://github.com/Jmaes-Nag/ctf-ai-bot
 cd ctf-ai-bot
 ```
 2. Build the image:
